@@ -6,6 +6,7 @@ import service.LogParsingService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class KeyObservation implements Analyzer {
 
@@ -29,17 +30,26 @@ public class KeyObservation implements Analyzer {
                 ip = entry.getKey();
             }
         }
+        List<Integer> hourTraffic = logParsingService.getPeakHour();
+        int maxTraffic = hourTraffic.get(0);
+        int hour = hourTraffic.get(0);
+        for(int i=0; i<hourTraffic.size(); i++) {
+            if(hourTraffic.get(i) > maxTraffic) {
+                maxTraffic = hourTraffic.get(i);
+                hour = i;
+            }
+        }
         System.out.println("Key Observations :");
         System.out.println("┌───────────────────────────────────────────────────────┐");
 
         if(!ip.isEmpty()) {
             System.out.println("   ►   High rate of requests from IP : "+ip);
+            System.out.println("   ►   Peak traffic hour : "+hour+":00 - "+hour+":59 with "+maxTraffic+" requests" );
         }
         System.out.println("└───────────────────────────────────────────────────────┘");
 
 
 
-        System.out.println("---------------------------------------------------------");
 //        System.out.println("Total Log Entries: " + entries.size());
 
         // Count entries by level

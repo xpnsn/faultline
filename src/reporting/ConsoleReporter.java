@@ -1,23 +1,28 @@
 package reporting;
 
+import analysis.Analyzer;
 import analysis.KeyObservation;
 import analysis.Summary;
 
+import java.util.List;
+
 public class ConsoleReporter implements Reporter {
 
-    private final KeyObservation keyObservation;
-    private final Summary summary;
+    private final List<Analyzer> analyzers;
 
-    public ConsoleReporter(KeyObservation keyObservation, Summary summary) {
-        this.keyObservation = keyObservation;
-        this.summary = summary;
+    public ConsoleReporter(List<Analyzer> analyzers) {
+        this.analyzers = analyzers;
     }
 
     @Override
     public void generateReport() {
 
-        keyObservation.analyze();
-        summary.analyze();
+        for(int i=0; i<analyzers.size(); i++) {
+            analyzers.get(i).analyze();
+            if(i != analyzers.size() - 1) {
+                System.out.println("---------------------------------------------------------");
+            }
+        }
 
     }
 }

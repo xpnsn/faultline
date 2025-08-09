@@ -18,7 +18,7 @@ public class LogParser {
 
     private static final String LOG_REGEX = "^(\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2})\\s+([A-Z]+)\\s+(.*)$";
     private static final String IP_REGEX = "\\b((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\b";
-    private static final String API_REGEX = "\\bapi\\/[\\w\\/-]+";
+    private static final String API_REGEX = "\\b(GET|POST|PUT|DELETE)\\s+(api/\\S+)";
 
     public Optional<LogEntity> parse(String log) {
 
@@ -66,13 +66,22 @@ public class LogParser {
         return Optional.empty();
     }
 
-    public Optional<?> getApiEndpoint(LogEntity log) {
+    public Optional<ApiEndpoint> getApiEndpoint(LogEntity log) {
         Pattern apiPattern = Pattern.compile(API_REGEX);
         Matcher apiMatcher = apiPattern.matcher(log.message());
 
-        if(apiMatcher.find()) {
-            return Optional.of(apiMatcher.group());
+        if (apiMatcher.find()) {
+            String method = apiMatcher.group(1);
+            String path = normalizePath(apiMatcher.group(2));
+            return Optional.of(new ApiEndpoint(path, method));
         }
         return Optional.empty();
     }
+
+    private String normalizePath(String path) {
+        // Replace numeric IDs or UUIDs with "*"
+        return path.replaceAll("\\b\\d+\\b", "*")
+                .replaceAll("\\b[0-9a-fA-F\\-]{36}\\b", "*"); // for UUIDs
+    }
+
 }

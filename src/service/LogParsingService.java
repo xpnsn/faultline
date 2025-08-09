@@ -52,13 +52,26 @@ public class LogParsingService {
         return logLevels;
     }
 
-    public Map<String, Integer> getEndpoints() {
-        Map<String, Integer> endpoints = new HashMap<>();
+    public Map<ApiEndpoint, Integer> getEndpoints() {
+        Map<ApiEndpoint, Integer> endpoints = new HashMap<>();
         List<LogEntity> logEntities = getLogEntities();
         for(LogEntity logEntity : logEntities) {
-            Optional<?> url = logParser.getApiEndpoint(logEntity);
-            url.ifPresent(o -> endpoints.put(o.toString(), endpoints.getOrDefault(o.toString(), 0) + 1));
+            Optional<ApiEndpoint> url = logParser.getApiEndpoint(logEntity);
+            url.ifPresent(o -> endpoints.put(o, endpoints.getOrDefault(o, 0) + 1));
         }
         return endpoints;
+    }
+
+    public List<Integer> getPeakHour() {
+        Map<Integer, Long> requestsPerHour = getLogEntities().stream()
+                .collect(Collectors.groupingBy(
+                        log -> log.timestamp().getHour(),
+                        Collectors.counting()
+                ));
+
+        return requestsPerHour.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(entry -> List.of(entry.getKey(), entry.getValue().intValue()))
+                .orElse(List.of());
     }
 }

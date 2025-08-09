@@ -1,4 +1,5 @@
 import analysis.Summary;
+import analysis.TrafficPattern;
 import model.LogEntity;
 import analysis.KeyObservation;
 import io.LogFileReader;
@@ -27,8 +28,9 @@ public class Main {
 
         KeyObservation keyObservation = new KeyObservation(logParsingService);
         Summary summary = new Summary(logParsingService);
+        TrafficPattern trafficPattern = new TrafficPattern(logParsingService);
 
-        Reporter reporter = new ConsoleReporter(keyObservation, summary);
+        Reporter reporter = new ConsoleReporter(List.of(keyObservation, summary, trafficPattern));
 
         reporter.generateReport();
     }
