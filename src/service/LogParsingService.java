@@ -62,16 +62,22 @@ public class LogParsingService {
         return endpoints;
     }
 
-    public List<Integer> getPeakHour() {
+    public Map<Integer, Long> getPeakHour() {
         Map<Integer, Long> requestsPerHour = getLogEntities().stream()
                 .collect(Collectors.groupingBy(
                         log -> log.timestamp().getHour(),
                         Collectors.counting()
                 ));
 
-        return requestsPerHour.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(entry -> List.of(entry.getKey(), entry.getValue().intValue()))
-                .orElse(List.of());
+        Map<Integer, Long> sortedRequestsPerHour = requestsPerHour.entrySet().stream()
+                .sorted(Map.Entry.<Integer, Long>comparingByValue().reversed()) // sort by value desc
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1, // merge function, not used here
+                        LinkedHashMap::new // keep insertion order (sorted order)
+                ));
+
+        return sortedRequestsPerHour;
     }
 }

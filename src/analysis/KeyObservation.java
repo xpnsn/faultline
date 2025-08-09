@@ -4,6 +4,7 @@ import model.LogEntity;
 import parsing.LogParser;
 import service.LogParsingService;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,16 +28,17 @@ public class KeyObservation implements Analyzer {
         int max = Integer.MIN_VALUE;
         for(Map.Entry<String, Integer> entry : iPs.entrySet()) {
             if(entry.getValue() > max) {
+                max = entry.getValue();
                 ip = entry.getKey();
             }
         }
-        List<Integer> hourTraffic = logParsingService.getPeakHour();
-        int maxTraffic = hourTraffic.get(0);
-        int hour = hourTraffic.get(0);
-        for(int i=0; i<hourTraffic.size(); i++) {
-            if(hourTraffic.get(i) > maxTraffic) {
-                maxTraffic = hourTraffic.get(i);
-                hour = i;
+        Map<Integer, Long> hourTraffic = logParsingService.getPeakHour();
+        Long maxTraffic = Long.MIN_VALUE;
+        int hour = -1;
+        for(Map.Entry<Integer, Long> entry : hourTraffic.entrySet()) {
+            if(entry.getValue() > maxTraffic) {
+                maxTraffic = entry.getValue();
+                hour = entry.getKey();
             }
         }
         System.out.println("Key Observations :");
@@ -44,6 +46,8 @@ public class KeyObservation implements Analyzer {
 
         if(!ip.isEmpty()) {
             System.out.println("   ►   High rate of requests from IP : "+ip);
+        }
+        if(hour != -1) {
             System.out.println("   ►   Peak traffic hour : "+hour+":00 - "+hour+":59 with "+maxTraffic+" requests" );
         }
         System.out.println("└───────────────────────────────────────────────────────┘");
